@@ -3,6 +3,7 @@ package sg.edu.rp.c346.p09_gettingmylocation;
 import android.Manifest;
 import android.content.Intent;
 import android.location.Location;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -20,6 +21,10 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+
 public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
@@ -27,6 +32,7 @@ public class MainActivity extends AppCompatActivity implements
     private Location mLocation;
     TextView tvLat, tvLong;
     Button btnStart, btnStop, btnCheck;
+    String folderLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +44,9 @@ public class MainActivity extends AppCompatActivity implements
         btnCheck = (Button) findViewById(R.id.btnCheck);
         btnStart = (Button) findViewById(R.id.btnStart);
         btnStop = (Button) findViewById(R.id.btnStop);
+
+        folderLocation = Environment.getExternalStorageDirectory()
+                .getAbsolutePath() + "/P09";
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -66,7 +75,35 @@ public class MainActivity extends AppCompatActivity implements
                 }
 
             }
-    });
+        });
+
+        btnCheck.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                File targetFile = new File(folderLocation, "data.txt");
+
+                if (targetFile.exists() == true) {
+                    String data = "";
+                    try {
+                        FileReader reader = new FileReader(targetFile);
+                        BufferedReader br = new BufferedReader(reader);
+                        String line = br.readLine();
+                        while (line != null) {
+                            data += line + "\n";
+                            line = br.readLine();
+                        }
+                        br.close();
+                        reader.close();
+                    } catch (Exception e) {
+                        Toast.makeText(MainActivity.this, "Failed to read!",
+                                Toast.LENGTH_LONG).show();
+                        e.printStackTrace();
+                    }
+                    Toast.makeText(MainActivity.this, data, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
     }
 
 

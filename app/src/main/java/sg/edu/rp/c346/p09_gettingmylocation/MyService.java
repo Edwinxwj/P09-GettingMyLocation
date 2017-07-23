@@ -31,9 +31,7 @@ public class MyService extends Service implements GoogleApiClient.ConnectionCall
     private GoogleApiClient mGoogleApiClient;
     private Location mLocation;
     String folderLocation;
-
     public MyService() {
-
     }
 
     @Override
@@ -45,7 +43,7 @@ public class MyService extends Service implements GoogleApiClient.ConnectionCall
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d("Service", "Created");
+        Log.d("Service","Created");
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -56,29 +54,39 @@ public class MyService extends Service implements GoogleApiClient.ConnectionCall
                 .getAbsolutePath() + "/P09";
 
         File folder = new File(folderLocation);
-        if (folder.exists() == false) {
+        if (folder.exists() == false){
             boolean result = folder.mkdir();
-            if (result == true) {
+            if (result == true){
                 Log.d("File Read/Write", "Folder created");
-                Toast.makeText(this, "File Read/Write, Folder created", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this,"File Read/Write, Folder created",Toast.LENGTH_SHORT).show();
 
-            } else {
-                Toast.makeText(this, "File Read/Write, Folder not created", Toast.LENGTH_SHORT).show();
+            }else{
+                Toast.makeText(this,"File Read/Write, Folder not created",Toast.LENGTH_SHORT).show();
             }
         }
 
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-
+    public int onStartCommand(Intent intent,int flags, int startId) {
+        if(started == false){
+            started = true;
+            Log.d("Service", "Started");
+            mGoogleApiClient.connect();
+        }else{
+            Log.d("Service","Still running");
+            Toast.makeText(this,"Service, Still running",Toast.LENGTH_SHORT).show();
+        }
         return Service.START_STICKY;
     }
 
+
     @Override
     public void onDestroy() {
-        Log.d("Service", "Exited");
         super.onDestroy();
+        Log.d("Service","Exited");
+        mGoogleApiClient.disconnect();
+
     }
 
     @Override
@@ -89,7 +97,7 @@ public class MyService extends Service implements GoogleApiClient.ConnectionCall
 
 
         if (permissionCheck_Coarse == PermissionChecker.PERMISSION_GRANTED
-                || permissionCheck_Fine == PermissionChecker.PERMISSION_GRANTED) {
+                ||  permissionCheck_Fine  == PermissionChecker.PERMISSION_GRANTED){
             mLocation = LocationServices.FusedLocationApi.getLastLocation(
                     mGoogleApiClient);
 
@@ -120,6 +128,7 @@ public class MyService extends Service implements GoogleApiClient.ConnectionCall
         }
     }
 
+
     @Override
     public void onLocationChanged(Location location) {
         //the detected location is given by the variable location in the signature
@@ -129,7 +138,7 @@ public class MyService extends Service implements GoogleApiClient.ConnectionCall
 
         try {
             FileWriter writer = new FileWriter(targetFile, true);
-            writer.write(location.getLatitude() + ", " + location.getLongitude() + "\n");
+            writer.write(location.getLatitude() + ", " + location.getLongitude() +"\n");
             writer.flush();
             writer.close();
         } catch (Exception e) {
@@ -139,6 +148,7 @@ public class MyService extends Service implements GoogleApiClient.ConnectionCall
         }
 
     }
+
 
     @Override
     public void onConnectionSuspended(int i) {
